@@ -1,12 +1,14 @@
 package scs
 
 import (
-	"context"
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/alexedwards/scs/v2/memstore"
+	"github.com/danielgtaylor/huma/v2"
 )
 
 // Deprecated: Session is a backwards-compatible alias for SessionManager.
@@ -43,7 +45,7 @@ type SessionManager struct {
 	// logged using Go's standard logger. If a custom ErrorFunc is set, then
 	// control will be passed to this instead. A typical use would be to provide
 	// a function which logs the error and returns a customized HTML error page.
-	ErrorFunc func(http.ResponseWriter, *http.Request, error)
+	ErrorFunc func(huma.Context, error)
 
 	// HashTokenInStore controls whether or not to store the session token or a hashed version in the store.
 	HashTokenInStore bool
@@ -120,61 +122,55 @@ func New() *SessionManager {
 	return s
 }
 
-// Deprecated: NewSession is a backwards-compatible alias for New. Use the New
-// function instead.
-func NewSession() *SessionManager {
-	return New()
-}
-
 // LoadAndSave provides middleware which automatically loads and saves session
 // data for the current request, and communicates the session token to and from
 // the client in a cookie.
-func (s *SessionManager) LoadAndSave(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Vary", "Cookie")
+func (s *SessionManager) LoadAndSave(ctx huma.Context, next func(huma.Context)) {
+	ctx.SetHeader("Vary", "Cookie")
+	var token string
+	cookie, err := huma.ReadCookie(ctx, s.Cookie.Name)
+	if err != nil {
+		fmt.Println("error reading cookie", err)
+		return
+	}
 
-		var token string
-		cookie, err := r.Cookie(s.Cookie.Name)
-		if err == nil {
-			token = cookie.Value
-		}
+	if cookie.Value != "" {
+		token = cookie.Value
+	}
 
-		ctx, err := s.Load(r.Context(), token)
-		if err != nil {
-			s.ErrorFunc(w, r, err)
-			return
-		}
+	// load session
+	ctx, err = s.Load(ctx, token)
+	if err != nil {
+		s.ErrorFunc(ctx, err)
+		return
+	}
 
-		sr := r.WithContext(ctx)
+	sw := &sessionResponseWriter{
+		request:        ctx,
+		sessionManager: s,
+	}
 
-		sw := &sessionResponseWriter{
-			ResponseWriter: w,
-			request:        sr,
-			sessionManager: s,
-		}
+	next(ctx)
 
-		next.ServeHTTP(sw, sr)
-
-		if !sw.written {
-			s.commitAndWriteSessionCookie(w, sr)
-		}
-	})
+	if !sw.written {
+		s.commitAndWriteSessionCookie(sw.request)
+	}
 }
 
-func (s *SessionManager) commitAndWriteSessionCookie(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+func (s *SessionManager) commitAndWriteSessionCookie(ctx huma.Context) {
+	context := ctx.Context()
 
-	switch s.Status(ctx) {
+	switch s.Status(context) {
 	case Modified:
-		token, expiry, err := s.Commit(ctx)
+		token, expiry, err := s.Commit(context)
 		if err != nil {
-			s.ErrorFunc(w, r, err)
+			s.ErrorFunc(ctx, err)
 			return
 		}
 
-		s.WriteSessionCookie(ctx, w, token, expiry)
+		s.WriteSessionCookie(ctx, token, expiry)
 	case Destroyed:
-		s.WriteSessionCookie(ctx, w, "", time.Time{})
+		s.WriteSessionCookie(ctx, "", time.Time{})
 	}
 }
 
@@ -188,7 +184,7 @@ func (s *SessionManager) commitAndWriteSessionCookie(w http.ResponseWriter, r *h
 //
 // Most applications will use the LoadAndSave() middleware and will not need to
 // use this method.
-func (s *SessionManager) WriteSessionCookie(ctx context.Context, w http.ResponseWriter, token string, expiry time.Time) {
+func (s *SessionManager) WriteSessionCookie(ctx huma.Context, token string, expiry time.Time) {
 	cookie := &http.Cookie{
 		Name:     s.Cookie.Name,
 		Value:    token,
@@ -202,45 +198,39 @@ func (s *SessionManager) WriteSessionCookie(ctx context.Context, w http.Response
 	if expiry.IsZero() {
 		cookie.Expires = time.Unix(1, 0)
 		cookie.MaxAge = -1
-	} else if s.Cookie.Persist || s.GetBool(ctx, "__rememberMe") {
+	} else if s.Cookie.Persist || s.GetBool(ctx.Context(), "__rememberMe") {
 		cookie.Expires = time.Unix(expiry.Unix()+1, 0)        // Round up to the nearest second.
 		cookie.MaxAge = int(time.Until(expiry).Seconds() + 1) // Round up to the nearest second.
 	}
 
-	w.Header().Add("Set-Cookie", cookie.String())
-	w.Header().Add("Cache-Control", `no-cache="Set-Cookie"`)
+	ctx.SetHeader("Set-Cookie", cookie.String())
+	ctx.SetHeader("Cache-Control", `no-cache="Set-Cookie"`)
 }
 
-func defaultErrorFunc(w http.ResponseWriter, r *http.Request, err error) {
+func defaultErrorFunc(ctx huma.Context, err error) {
 	log.Output(2, err.Error())
-	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	ctx.BodyWriter().Write([]byte(err.Error()))
 }
 
 type sessionResponseWriter struct {
-	http.ResponseWriter
-	request        *http.Request
+	request        huma.Context
 	sessionManager *SessionManager
 	written        bool
 }
 
 func (sw *sessionResponseWriter) Write(b []byte) (int, error) {
 	if !sw.written {
-		sw.sessionManager.commitAndWriteSessionCookie(sw.ResponseWriter, sw.request)
+		sw.sessionManager.commitAndWriteSessionCookie(sw.request)
 		sw.written = true
 	}
 
-	return sw.ResponseWriter.Write(b)
+	return sw.request.BodyWriter().Write(b)
 }
 
 func (sw *sessionResponseWriter) WriteHeader(code int) {
 	if !sw.written {
-		sw.sessionManager.commitAndWriteSessionCookie(sw.ResponseWriter, sw.request)
+		sw.sessionManager.commitAndWriteSessionCookie(sw.request)
 		sw.written = true
 	}
-
-	sw.ResponseWriter.WriteHeader(code)
-}
-
-func (sw *sessionResponseWriter) Unwrap() http.ResponseWriter {
-	return sw.ResponseWriter
+	sw.request.AppendHeader("Status", strconv.Itoa(code))
 }
