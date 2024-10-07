@@ -93,9 +93,11 @@ func (e *EtcdStore) AllCtx(ctx context.Context) (map[string][]byte, error) {
 func (e *EtcdStore) Find(token string) ([]byte, bool, error) {
 	panic("missing context arg")
 }
+
 func (e *EtcdStore) Commit(token string, b []byte, expiry time.Time) error {
 	panic("missing context arg")
 }
+
 func (e *EtcdStore) Delete(token string) error {
 	panic("missing context arg")
 }

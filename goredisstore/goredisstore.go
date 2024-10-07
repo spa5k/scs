@@ -98,9 +98,11 @@ func (r *RedisStore) AllCtx(ctx context.Context) (map[string][]byte, error) {
 func (r *RedisStore) Find(token string) ([]byte, bool, error) {
 	panic("missing context arg")
 }
+
 func (r *RedisStore) Commit(token string, b []byte, expiry time.Time) error {
 	panic("missing context arg")
 }
+
 func (r *RedisStore) Delete(token string) error {
 	panic("missing context arg")
 }

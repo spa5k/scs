@@ -19,7 +19,6 @@ func TestFind(t *testing.T) {
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		t.Fatalf("got %v: expected %v", err, nil)
-
 	}
 	defer func() {
 		if err = client.Disconnect(ctx); err != nil {
@@ -53,7 +52,6 @@ func TestFindMissing(t *testing.T) {
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		t.Fatalf("got %v: expected %v", err, nil)
-
 	}
 	defer func() {
 		if err = client.Disconnect(ctx); err != nil {
@@ -79,7 +77,6 @@ func TestCommitNew(t *testing.T) {
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		t.Fatalf("got %v: expected %v", err, nil)
-
 	}
 	defer func() {
 		if err = client.Disconnect(ctx); err != nil {
@@ -120,7 +117,6 @@ func TestCommitUpdated(t *testing.T) {
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		t.Fatalf("got %v: expected %v", err, nil)
-
 	}
 	defer func() {
 		if err = client.Disconnect(ctx); err != nil {
@@ -166,7 +162,6 @@ func TestExpiry(t *testing.T) {
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		t.Fatalf("got %v: expected %v", err, nil)
-
 	}
 	defer func() {
 		if err = client.Disconnect(ctx); err != nil {
@@ -200,7 +195,6 @@ func TestDelete(t *testing.T) {
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		t.Fatalf("got %v: expected %v", err, nil)
-
 	}
 	defer func() {
 		if err = client.Disconnect(ctx); err != nil {
@@ -235,7 +229,6 @@ func TestCleanupInterval(t *testing.T) {
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		t.Fatalf("got %v: expected %v", err, nil)
-
 	}
 	defer func() {
 		if err = client.Disconnect(ctx); err != nil {

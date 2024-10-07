@@ -173,9 +173,11 @@ func (m *FireStore) deleteExpired() error {
 func (m *FireStore) Find(token string) ([]byte, bool, error) {
 	panic("missing context arg")
 }
+
 func (m *FireStore) Commit(token string, b []byte, expiry time.Time) error {
 	panic("missing context arg")
 }
+
 func (m *FireStore) Delete(token string) error {
 	panic("missing context arg")
 }

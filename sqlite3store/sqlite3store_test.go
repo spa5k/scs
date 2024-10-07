@@ -80,6 +80,7 @@ func TestFind(t *testing.T) {
 		t.Fatalf("got %v: expected %v", b, []byte("encoded_data"))
 	}
 }
+
 func TestFindMissing(t *testing.T) {
 	dsn := "./testSQL3lite.db"
 	if err := removeDBfile(dsn); err != nil {

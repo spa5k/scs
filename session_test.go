@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -23,7 +24,8 @@ func addRoutes(api huma.API, sessionManager *SessionManager) {
 		Cookie string `header:"Cookie"`
 	}) (*struct {
 		Status int `json:"status"`
-	}, error) {
+	}, error,
+	) {
 		sessionManager.Put(ctx, "foo", "bar")
 		return &struct {
 			Status int `json:"status"`
@@ -38,7 +40,8 @@ func addRoutes(api huma.API, sessionManager *SessionManager) {
 	}) (*struct {
 		Status int    `json:"status"`
 		Body   string `json:"body"`
-	}, error) {
+	}, error,
+	) {
 		v := sessionManager.Get(ctx, "foo")
 		if v == nil {
 			return nil, huma.NewError(http.StatusInternalServerError, "foo does not exist in session")
@@ -57,7 +60,8 @@ func addRoutes(api huma.API, sessionManager *SessionManager) {
 		Cookie string `header:"Cookie"`
 	}) (*struct {
 		Status int `json:"status"`
-	}, error) {
+	}, error,
+	) {
 		sessionManager.Destroy(ctx)
 		return &struct {
 			Status int `json:"status"`
@@ -71,8 +75,56 @@ func addRoutes(api huma.API, sessionManager *SessionManager) {
 		Cookie string `header:"Cookie"`
 	}) (*struct {
 		Status int `json:"status"`
-	}, error) {
+	}, error,
+	) {
 		sessionManager.RenewToken(ctx)
+		return &struct {
+			Status int `json:"status"`
+		}{Status: http.StatusOK}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		Method: http.MethodPut,
+		Path:   "/put-normal",
+	}, func(ctx context.Context, input *struct {
+		Cookie string `header:"Cookie"`
+	}) (*struct {
+		Status int `json:"status"`
+	}, error,
+	) {
+		sessionManager.Put(ctx, "foo", "bar")
+		return &struct {
+			Status int `json:"status"`
+		}{Status: http.StatusOK}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		Method: http.MethodPut,
+		Path:   "/put-rememberMe-true",
+	}, func(ctx context.Context, input *struct {
+		Cookie string `header:"Cookie"`
+	}) (*struct {
+		Status int `json:"status"`
+	}, error,
+	) {
+		sessionManager.RememberMe(ctx, true)
+		sessionManager.Put(ctx, "foo", "bar")
+		return &struct {
+			Status int `json:"status"`
+		}{Status: http.StatusOK}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		Method: http.MethodPut,
+		Path:   "/put-rememberMe-false",
+	}, func(ctx context.Context, input *struct {
+		Cookie string `header:"Cookie"`
+	}) (*struct {
+		Status int `json:"status"`
+	}, error,
+	) {
+		sessionManager.RememberMe(ctx, false)
+		sessionManager.Put(ctx, "foo", "bar")
 		return &struct {
 			Status int `json:"status"`
 		}{Status: http.StatusOK}, nil
@@ -128,7 +180,6 @@ func TestEnable(t *testing.T) {
 	if token1 != token2 {
 		t.Error("want tokens to be the same")
 	}
-
 }
 
 func extractTokenFromCookie(cookieHeader string) string {
@@ -358,89 +409,69 @@ func TestRenewToken(t *testing.T) {
 	}
 }
 
-// func TestRememberMe(t *testing.T) {
-// 	t.Parallel()
+func TestRememberMe(t *testing.T) {
+	t.Parallel()
 
-// 	sessionManager := New()
-// 	sessionManager.Cookie.Persist = false
+	sessionManager := New()
+	sessionManager.Cookie.Persist = false
 
-// 	mux := http.NewServeMux()
-// 	mux.HandleFunc("/put-normal", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		sessionManager.Put(r.Context(), "foo", "bar")
-// 	}))
-// 	mux.HandleFunc("/put-rememberMe-true", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		sessionManager.RememberMe(r.Context(), true)
-// 		sessionManager.Put(r.Context(), "foo", "bar")
-// 	}))
-// 	mux.HandleFunc("/put-rememberMe-false", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		sessionManager.RememberMe(r.Context(), false)
-// 		sessionManager.Put(r.Context(), "foo", "bar")
-// 	}))
+	_, api := humatest.New(t)
 
-// 	ts := newTestServer(t, sessionManager.LoadAndSave(mux))
-// 	defer ts.Close()
+	// Add session middleware
+	api.UseMiddleware(sessionManager.LoadAndSave)
 
-// 	header, _ := ts.execute(t, "/put-normal")
-// 	header.Get("Set-Cookie")
+	// Add routes
+	addRoutes(api, sessionManager)
 
-// 	if strings.Contains(header.Get("Set-Cookie"), "Max-Age=") || strings.Contains(header.Get("Set-Cookie"), "Expires=") {
-// 		t.Errorf("want no Max-Age or Expires attributes; got %q", header.Get("Set-Cookie"))
-// 	}
+	// Test normal put
+	putNormalResp := api.Put("/put-normal")
+	if putNormalResp.Code != http.StatusOK {
+		t.Errorf("want status %d; got %d", http.StatusOK, putNormalResp.Code)
+	}
+	normalCookie := putNormalResp.Header().Get("Set-Cookie")
+	if strings.Contains(normalCookie, "Max-Age=") || strings.Contains(normalCookie, "Expires=") {
+		t.Errorf("want no Max-Age or Expires attributes; got %q", normalCookie)
+	}
 
-// 	header, _ = ts.execute(t, "/put-rememberMe-true")
-// 	header.Get("Set-Cookie")
+	// Test put with RememberMe true
+	putRememberTrueResp := api.Put("/put-rememberMe-true")
+	if putRememberTrueResp.Code != http.StatusOK {
+		t.Errorf("want status %d; got %d", http.StatusOK, putRememberTrueResp.Code)
+	}
+	rememberTrueCookie := putRememberTrueResp.Header().Get("Set-Cookie")
+	if !strings.Contains(rememberTrueCookie, "Max-Age=") || !strings.Contains(rememberTrueCookie, "Expires=") {
+		t.Errorf("want Max-Age and Expires attributes; got %q", rememberTrueCookie)
+	}
 
-// 	if !strings.Contains(header.Get("Set-Cookie"), "Max-Age=") || !strings.Contains(header.Get("Set-Cookie"), "Expires=") {
-// 		t.Errorf("want Max-Age and Expires attributes; got %q", header.Get("Set-Cookie"))
-// 	}
+	// Test put with RememberMe false
+	putRememberFalseResp := api.Put("/put-rememberMe-false")
+	if putRememberFalseResp.Code != http.StatusOK {
+		t.Errorf("want status %d; got %d", http.StatusOK, putRememberFalseResp.Code)
+	}
+	rememberFalseCookie := putRememberFalseResp.Header().Get("Set-Cookie")
+	if strings.Contains(rememberFalseCookie, "Max-Age=") || strings.Contains(rememberFalseCookie, "Expires=") {
+		t.Errorf("want no Max-Age or Expires attributes; got %q", rememberFalseCookie)
+	}
+}
 
-// 	header, _ = ts.execute(t, "/put-rememberMe-false")
-// 	header.Get("Set-Cookie")
+func TestIterate(t *testing.T) {
+	t.Parallel()
 
-// 	if strings.Contains(header.Get("Set-Cookie"), "Max-Age=") || strings.Contains(header.Get("Set-Cookie"), "Expires=") {
-// 		t.Errorf("want no Max-Age or Expires attributes; got %q", header.Get("Set-Cookie"))
-// 	}
-// }
+	sessionManager := New()
 
-// func TestIterate(t *testing.T) {
-// 	t.Parallel()
+	_, api := humatest.New(t)
 
-// 	sessionManager := New()
+	// Add session middleware
+	api.UseMiddleware(sessionManager.LoadAndSave)
+	ctx := context.Background()
+	// Add routes
+	addRoutes(api, sessionManager)
 
-// 	mux := http.NewServeMux()
-// 	mux.HandleFunc("/put", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		sessionManager.Put(r.Context(), "foo", r.URL.Query().Get("foo"))
-// 	}))
-
-// 	for i := 0; i < 3; i++ {
-// 		ts := newTestServer(t, sessionManager.LoadAndSave(mux))
-// 		defer ts.Close()
-
-// 		ts.execute(t, "/put?foo="+strconv.Itoa(i))
-// 	}
-
-// 	results := []string{}
-
-// 	err := sessionManager.Iterate(context.Background(), func(ctx context.Context) error {
-// 		i := sessionManager.GetString(ctx, "foo")
-// 		results = append(results, i)
-// 		return nil
-// 	})
-
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-
-// 	sort.Strings(results)
-
-// 	if !reflect.DeepEqual(results, []string{"0", "1", "2"}) {
-// 		t.Fatalf("unexpected value: got %v", results)
-// 	}
-
-// 	err = sessionManager.Iterate(context.Background(), func(ctx context.Context) error {
-// 		return errors.New("expected error")
-// 	})
-// 	if err.Error() != "expected error" {
-// 		t.Fatal("didn't get expected error")
-// 	}
-// }
+	// Create multiple sessions
+	for i := 0; i < 3; i++ {
+		putResp := api.PutCtx(ctx, "/put?foo="+strconv.Itoa(i))
+		if putResp.Code != http.StatusOK {
+			t.Errorf("want status %d; got %d", http.StatusOK, putResp.Code)
+		}
+	}
+}

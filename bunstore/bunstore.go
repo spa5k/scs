@@ -172,9 +172,11 @@ func (b *BunStore) deleteExpired() error {
 func (b *BunStore) Find(token string) ([]byte, bool, error) {
 	panic("missing context arg")
 }
+
 func (b *BunStore) Commit(token string, bb []byte, expiry time.Time) error {
 	panic("missing context arg")
 }
+
 func (b *BunStore) Delete(token string) error {
 	panic("missing context arg")
 }

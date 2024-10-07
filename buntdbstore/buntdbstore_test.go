@@ -3,10 +3,9 @@ package buntdbstore
 import (
 	"bytes"
 	"os"
+	"strings"
 	"testing"
 	"time"
-
-	"strings"
 
 	"github.com/tidwall/buntdb"
 )
@@ -121,7 +120,6 @@ func TestDelete(t *testing.T) {
 			t.Fatalf("got %v, expected %v", found, false)
 		}
 	}
-
 }
 
 func TestExpire(t *testing.T) {

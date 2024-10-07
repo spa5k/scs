@@ -11,9 +11,7 @@ import (
 	"github.com/dgraph-io/badger"
 )
 
-var (
-	db *badger.DB
-)
+var db *badger.DB
 
 func TestMain(m *testing.M) {
 	var (
