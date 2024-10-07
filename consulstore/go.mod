@@ -1,4 +1,4 @@
-module github.com/alexedwards/scs/consulstore
+module github.com/spa5k/huma-scs/consulstore
 
 go 1.16
 

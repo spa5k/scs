@@ -1,4 +1,4 @@
-module github.com/alexedwards/scs/badgerstore
+module github.com/spa5k/huma-scs/badgerstore
 
 go 1.12
 

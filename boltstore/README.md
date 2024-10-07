@@ -1,6 +1,6 @@
 # boltstore
 
-A [Bolt](https://github.com/etcd-io/bbolt) based session store for [SCS](https://github.com/alexedwards/scs).
+A [Bolt](https://github.com/etcd-io/bbolt) based session store for [SCS](https://github.com/spa5k/huma-scs).
 
 ## Setup
 
@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/spa5k/huma-scs"
-	"github.com/alexedwards/scs/boltstore"
+	"github.com/spa5k/huma-scs/boltstore"
 	"go.etcd.io/bbolt"
 )
 

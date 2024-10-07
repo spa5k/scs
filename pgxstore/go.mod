@@ -1,4 +1,4 @@
-module github.com/alexedwards/scs/pgxstore
+module github.com/spa5k/huma-scs/pgxstore
 
 go 1.14
 

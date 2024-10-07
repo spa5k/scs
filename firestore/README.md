@@ -1,6 +1,6 @@
 # firestore
 
-A [Google Cloud Firestore](https://pkg.go.dev/cloud.google.com/go/firestore) based session store for [SCS](https://github.com/alexedwards/scs).
+A [Google Cloud Firestore](https://pkg.go.dev/cloud.google.com/go/firestore) based session store for [SCS](https://github.com/spa5k/huma-scs).
 
 ## Setup
 
@@ -21,7 +21,7 @@ import (
 	"os"
 
 	"cloud.google.com/go/firestore"
-	scsfs "github.com/alexedwards/scs/firestore"
+	scsfs "github.com/spa5k/huma-scs/firestore"
 	"github.com/spa5k/huma-scs"
 )
 

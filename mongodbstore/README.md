@@ -1,6 +1,6 @@
 # mongodbstore
 
-A [MongoDB](https://github.com/mongodb/mongo-go-driver) based session store for [SCS](https://github.com/alexedwards/scs).
+A [MongoDB](https://github.com/mongodb/mongo-go-driver) based session store for [SCS](https://github.com/spa5k/huma-scs).
 
 ## Setup
 
@@ -17,7 +17,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/alexedwards/scs/mongodbstore"
+	"github.com/spa5k/huma-scs/mongodbstore"
 	"github.com/spa5k/huma-scs"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

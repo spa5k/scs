@@ -1,4 +1,4 @@
-module github.com/alexedwards/scs/mongodbstore
+module github.com/spa5k/huma-scs/mongodbstore
 
 go 1.16
 

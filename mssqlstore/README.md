@@ -1,6 +1,6 @@
 # mssqlstore
 
-A [MSSQL](https://github.com/denisenkom/go-mssqldb) based session store for [SCS](https://github.com/alexedwards/scs).
+A [MSSQL](https://github.com/denisenkom/go-mssqldb) based session store for [SCS](https://github.com/spa5k/huma-scs).
 
 ## Setup
 
@@ -30,7 +30,7 @@ import (
 	"net/http"
 
 	"github.com/spa5k/huma-scs"
-	"github.com/alexedwards/scs/mssqlstore"
+	"github.com/spa5k/huma-scs/mssqlstore"
 
 	_ "github.com/denisenkom/go-mssqldb"
 )

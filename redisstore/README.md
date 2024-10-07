@@ -1,6 +1,6 @@
 # redisstore
 
-A [Redis](https://github.com/gomodule/redigo) based session store for [SCS](https://github.com/alexedwards/scs).
+A [Redis](https://github.com/gomodule/redigo) based session store for [SCS](https://github.com/spa5k/huma-scs).
 
 ## Setup
 
@@ -16,7 +16,7 @@ import (
 	"net/http"
 
 	"github.com/spa5k/huma-scs"
-	"github.com/alexedwards/scs/redisstore"
+	"github.com/spa5k/huma-scs/redisstore"
 	"github.com/gomodule/redigo/redis"
 )
 

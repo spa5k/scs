@@ -1,6 +1,6 @@
 # bunstore
 
-A [Bun](https://github.com/uptrace/bun) based session store for [SCS](https://github.com/alexedwards/scs).
+A [Bun](https://github.com/uptrace/bun) based session store for [SCS](https://github.com/spa5k/huma-scs).
 
 ## Setup
 
@@ -15,7 +15,7 @@ CREATE TABLE sessions (
 
 CREATE INDEX sessions_expiry_idx ON sessions (expiry);
 ```
-For other stores you can find the setup here: [MySQL](https://github.com/alexedwards/scs/tree/master/mysqlstore), [SQLite3](https://github.com/alexedwards/scs/tree/master/sqlite3store).
+For other stores you can find the setup here: [MySQL](https://github.com/spa5k/huma-scs/tree/master/mysqlstore), [SQLite3](https://github.com/spa5k/huma-scs/tree/master/sqlite3store).
 
 If no table is present, a new one will be automatically created.
 
@@ -32,7 +32,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/alexedwards/scs/bunstore"
+	"github.com/spa5k/huma-scs/bunstore"
 	"github.com/spa5k/huma-scs"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"

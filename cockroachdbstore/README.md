@@ -1,6 +1,6 @@
 # cockroachdbstore
 
-A CockroachDB based session store for [SCS](https://github.com/alexedwards/scs) using the [pq](https://github.com/lib/pq) driver.
+A CockroachDB based session store for [SCS](https://github.com/spa5k/huma-scs) using the [pq](https://github.com/lib/pq) driver.
 
 ## Setup
 
@@ -30,7 +30,7 @@ import (
 	"net/http"
 
 	"github.com/spa5k/huma-scs"
-	"github.com/alexedwards/scs/cockroachdbstore"
+	"github.com/spa5k/huma-scs/cockroachdbstore"
 
 	_ "github.com/lib/pq"
 )

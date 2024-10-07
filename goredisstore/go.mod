@@ -1,4 +1,4 @@
-module github.com/alexedwards/scs/goredisstore
+module github.com/spa5k/huma-scs/goredisstore
 
 go 1.14
 

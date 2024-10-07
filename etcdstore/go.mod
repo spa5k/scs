@@ -1,4 +1,4 @@
-module github.com/alexedwards/scs/etcdstore
+module github.com/spa5k/huma-scs/etcdstore
 
 go 1.16
 

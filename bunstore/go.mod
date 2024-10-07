@@ -1,4 +1,4 @@
-module github.com/alexedwards/scs/bunstore
+module github.com/spa5k/huma-scs/bunstore
 
 go 1.17
 

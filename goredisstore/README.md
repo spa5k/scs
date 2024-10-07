@@ -1,6 +1,6 @@
 # goredisstore
 
-A [Redis](github.com/redis/go-redis/v9) based session store for [SCS](https://github.com/alexedwards/scs).
+A [Redis](github.com/redis/go-redis/v9) based session store for [SCS](https://github.com/spa5k/huma-scs).
 
 ## Setup
 
@@ -16,7 +16,7 @@ import (
 	"net/http"
 
 	"github.com/spa5k/huma-scs"
-	"github.com/alexedwards/scs/goredisstore"
+	"github.com/spa5k/huma-scs/goredisstore"
 	"github.com/redis/go-redis/v9"
 )
 

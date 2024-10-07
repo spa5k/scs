@@ -1,6 +1,6 @@
 # consulstore
 
-A [Consul](https://github.com/hashicorp/consul) based session store for [SCS](https://github.com/alexedwards/scs).
+A [Consul](https://github.com/hashicorp/consul) based session store for [SCS](https://github.com/spa5k/huma-scs).
 
 ## Setup
 
@@ -16,7 +16,7 @@ import (
 	"net/http"
 
 	"github.com/spa5k/huma-scs"
-	"github.com/alexedwards/scs/consulstore"
+	"github.com/spa5k/huma-scs/consulstore"
 	"github.com/hashicorp/consul/api"
 )
 

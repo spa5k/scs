@@ -1,8 +1,8 @@
 # SCS: HTTP Session Management for Go
 
-[![GoDoc](https://godoc.org/github.com/alexedwards/scs?status.png)](https://pkg.go.dev/github.com/spa5k/huma-scs?tab=doc)
-[![Go report card](https://goreportcard.com/badge/github.com/alexedwards/scs)](https://goreportcard.com/report/github.com/alexedwards/scs)
-[![Test coverage](http://gocover.io/_badge/github.com/alexedwards/scs)](https://gocover.io/github.com/alexedwards/scs)
+[![GoDoc](https://godoc.org/github.com/spa5k/huma-scs?status.png)](https://pkg.go.dev/github.com/spa5k/huma-scs?tab=doc)
+[![Go report card](https://goreportcard.com/badge/github.com/spa5k/huma-scs)](https://goreportcard.com/report/github.com/spa5k/huma-scs)
+[![Test coverage](http://gocover.io/_badge/github.com/spa5k/huma-scs)](https://gocover.io/github.com/spa5k/huma-scs)
 
 ## Features
 
@@ -39,9 +39,9 @@ This package requires Go 1.12 or newer.
 go get github.com/spa5k/huma-scs
 ```
 
-Note: If you're using the traditional `GOPATH` mechanism to manage dependencies, instead of modules, you'll need to `go get` and `import` `github.com/alexedwards/scs` without the `v2` suffix.
+Note: If you're using the traditional `GOPATH` mechanism to manage dependencies, instead of modules, you'll need to `go get` and `import` `github.com/spa5k/huma-scs` without the `v2` suffix.
 
-Please use [versioned releases](https://github.com/alexedwards/scs/releases). Code in tip may contain experimental features which are subject to change.
+Please use [versioned releases](https://github.com/spa5k/huma-scs/releases). Code in tip may contain experimental features which are subject to change.
 
 ### Basic Use
 
@@ -149,26 +149,26 @@ By default SCS uses an in-memory store for session data. This is convenient (no 
 
 The session stores currently included are shown in the table below. Please click the links for usage instructions and examples.
 
-| Package                                                                             |                                                                                       |
-| :---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| [badgerstore](https://github.com/alexedwards/scs/tree/master/badgerstore)           | Badger based session store                                                            |
-| [boltstore](https://github.com/alexedwards/scs/tree/master/boltstore)               | Bolt based session store                                                              |
-| [bunstore](https://github.com/alexedwards/scs/tree/master/bunstore)                 | Bun based session store                                                               |
-| [buntdbstore](https://github.com/alexedwards/scs/tree/master/buntdbstore)           | BuntDB based session store                                                            |
-| [cockroachdbstore](https://github.com/alexedwards/scs/tree/master/cockroachdbstore) | CockroachDB based session store                                                       |
-| [consulstore](https://github.com/alexedwards/scs/tree/master/consulstore)           | Consul based session store                                                            |
-| [etcdstore](https://github.com/alexedwards/scs/tree/master/etcdstore)               | Etcd based session store                                                              |
-| [firestore](https://github.com/alexedwards/scs/tree/master/firestore)               | Google Cloud Firestore based session store                                            |
-| [gormstore](https://github.com/alexedwards/scs/tree/master/gormstore)               | GORM based session store                                                              |
-| [leveldbstore](https://github.com/alexedwards/scs/tree/master/leveldbstore)         | LevelDB based session store                                                           |
-| [memstore](https://github.com/alexedwards/scs/tree/master/memstore)                 | In-memory session store (default)                                                     |
-| [mongodbstore](https://github.com/alexedwards/scs/tree/master/mongodbstore)         | MongoDB based session store                                                           |
-| [mssqlstore](https://github.com/alexedwards/scs/tree/master/mssqlstore)             | MSSQL based session store                                                             |
-| [mysqlstore](https://github.com/alexedwards/scs/tree/master/mysqlstore)             | MySQL based session store                                                             |
-| [pgxstore](https://github.com/alexedwards/scs/tree/master/pgxstore)                 | PostgreSQL based session store (using the [pgx](https://github.com/jackc/pgx) driver) |
-| [postgresstore](https://github.com/alexedwards/scs/tree/master/postgresstore)       | PostgreSQL based session store (using the [pq](https://github.com/lib/pq) driver)     |
-| [redisstore](https://github.com/alexedwards/scs/tree/master/redisstore)             | Redis based session store                                                             |
-| [sqlite3store](https://github.com/alexedwards/scs/tree/master/sqlite3store)         | SQLite3 based session store                                                           |
+| Package                                                                            |                                                                                       |
+| :--------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [badgerstore](https://github.com/spa5k/huma-scs/tree/master/badgerstore)           | Badger based session store                                                            |
+| [boltstore](https://github.com/spa5k/huma-scs/tree/master/boltstore)               | Bolt based session store                                                              |
+| [bunstore](https://github.com/spa5k/huma-scs/tree/master/bunstore)                 | Bun based session store                                                               |
+| [buntdbstore](https://github.com/spa5k/huma-scs/tree/master/buntdbstore)           | BuntDB based session store                                                            |
+| [cockroachdbstore](https://github.com/spa5k/huma-scs/tree/master/cockroachdbstore) | CockroachDB based session store                                                       |
+| [consulstore](https://github.com/spa5k/huma-scs/tree/master/consulstore)           | Consul based session store                                                            |
+| [etcdstore](https://github.com/spa5k/huma-scs/tree/master/etcdstore)               | Etcd based session store                                                              |
+| [firestore](https://github.com/spa5k/huma-scs/tree/master/firestore)               | Google Cloud Firestore based session store                                            |
+| [gormstore](https://github.com/spa5k/huma-scs/tree/master/gormstore)               | GORM based session store                                                              |
+| [leveldbstore](https://github.com/spa5k/huma-scs/tree/master/leveldbstore)         | LevelDB based session store                                                           |
+| [memstore](https://github.com/spa5k/huma-scs/tree/master/memstore)                 | In-memory session store (default)                                                     |
+| [mongodbstore](https://github.com/spa5k/huma-scs/tree/master/mongodbstore)         | MongoDB based session store                                                           |
+| [mssqlstore](https://github.com/spa5k/huma-scs/tree/master/mssqlstore)             | MSSQL based session store                                                             |
+| [mysqlstore](https://github.com/spa5k/huma-scs/tree/master/mysqlstore)             | MySQL based session store                                                             |
+| [pgxstore](https://github.com/spa5k/huma-scs/tree/master/pgxstore)                 | PostgreSQL based session store (using the [pgx](https://github.com/jackc/pgx) driver) |
+| [postgresstore](https://github.com/spa5k/huma-scs/tree/master/postgresstore)       | PostgreSQL based session store (using the [pq](https://github.com/lib/pq) driver)     |
+| [redisstore](https://github.com/spa5k/huma-scs/tree/master/redisstore)             | Redis based session store                                                             |
+| [sqlite3store](https://github.com/spa5k/huma-scs/tree/master/sqlite3store)         | SQLite3 based session store                                                           |
 
 Custom session stores are also supported. Please [see here](#using-custom-session-stores) for more information.
 
@@ -300,13 +300,13 @@ func flushingHandler(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-For a complete working example, please see [this comment](https://github.com/alexedwards/scs/issues/141#issuecomment-1774050802).
+For a complete working example, please see [this comment](https://github.com/spa5k/huma-scs/issues/141#issuecomment-1774050802).
 
 Note that the `http.ResponseWriter` passed on by the [`LoadAndSave()`](https://pkg.go.dev/github.com/spa5k/huma-scs#SessionManager.LoadAndSave) middleware does not support the `http.Flusher` interface directly. This effectively means that flushing/streaming is only supported by SCS if you are using Go >= 1.20.
 
 ### Compatibility
 
-You may have some problems using this package with Go frameworks that do not propagate the request context from standard-library compatible middleware, like [Echo](https://github.com/alexedwards/scs/issues/57) and [Fiber](https://github.com/alexedwards/scs/issues/106). If you are using Echo, please use the [echo-scs-session](https://github.com/spazzymoto/echo-scs-session) fork of this package instead.
+You may have some problems using this package with Go frameworks that do not propagate the request context from standard-library compatible middleware, like [Echo](https://github.com/spa5k/huma-scs/issues/57) and [Fiber](https://github.com/spa5k/huma-scs/issues/106). If you are using Echo, please use the [echo-scs-session](https://github.com/spazzymoto/echo-scs-session) fork of this package instead.
 
 ### Contributing
 

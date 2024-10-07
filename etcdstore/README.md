@@ -1,6 +1,6 @@
 # etcdstore
 
-A [etcd](https://github.com/etcd-io/etcd) based session store for [SCS](https://github.com/alexedwards/scs).
+A [etcd](https://github.com/etcd-io/etcd) based session store for [SCS](https://github.com/spa5k/huma-scs).
 
 ## Setup
 
@@ -16,7 +16,7 @@ import (
 	"net/http"
 
 	"github.com/spa5k/huma-scs"
-	"github.com/alexedwards/scs/etcdstore"
+	"github.com/spa5k/huma-scs/etcdstore"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
