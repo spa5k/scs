@@ -2,9 +2,7 @@ package scs
 
 import (
 	"log"
-	"log/slog"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -123,8 +121,6 @@ func New() *SessionManager {
 	return s
 }
 
-var logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-
 // LoadAndSave provides middleware which automatically loads and saves session
 // data for the current request, and communicates the session token to and from
 // the client in a cookie.
@@ -137,11 +133,13 @@ func (s *SessionManager) LoadAndSave(ctx huma.Context, next func(huma.Context)) 
 		token = cookie.Value
 	}
 
-	ctx, err = s.Load(ctx, token)
+	newCtx, err := s.Load(ctx.Context(), token)
 	if err != nil {
 		s.ErrorFunc(ctx, err)
 		return
 	}
+
+	ctx = huma.WithContext(ctx, newCtx)
 
 	sw := &sessionResponseWriter{
 		request:        ctx,

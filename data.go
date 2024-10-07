@@ -10,8 +10,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"github.com/danielgtaylor/huma/v2"
 )
 
 // Status represents the state of the session data during a request cycle.
@@ -53,8 +51,8 @@ func newSessionData(lifetime time.Duration) *sessionData {
 //
 // Most applications will use the LoadAndSave() middleware and will not need to
 // use this method.
-func (s *SessionManager) Load(ctx huma.Context, token string) (huma.Context, error) {
-	if _, ok := ctx.Context().Value(s.contextKey).(*sessionData); ok {
+func (s *SessionManager) Load(ctx context.Context, token string) (context.Context, error) {
+	if _, ok := ctx.Value(s.contextKey).(*sessionData); ok {
 		return ctx, nil
 	}
 
@@ -62,7 +60,7 @@ func (s *SessionManager) Load(ctx huma.Context, token string) (huma.Context, err
 		return s.addSessionDataToContext(ctx, newSessionData(s.Lifetime)), nil
 	}
 
-	b, found, err := s.doStoreFind(ctx.Context(), token)
+	b, found, err := s.doStoreFind(ctx, token)
 	if err != nil {
 		return nil, err
 	} else if !found {
@@ -540,8 +538,8 @@ func (s *SessionManager) RememberMe(ctx context.Context, val bool) {
 // Iterate retrieves all active (i.e. not expired) sessions from the store and
 // executes the provided function fn for each session. If the session store
 // being used does not support iteration then Iterate will panic.
-func (s *SessionManager) Iterate(ctx huma.Context, fn func(huma.Context) error) error {
-	allSessions, err := s.doStoreAll(ctx.Context())
+func (s *SessionManager) Iterate(ctx context.Context, fn func(context.Context) error) error {
+	allSessions, err := s.doStoreAll(ctx)
 	if err != nil {
 		return err
 	}
@@ -605,8 +603,8 @@ func (s *SessionManager) Token(ctx context.Context) string {
 	return sd.token
 }
 
-func (s *SessionManager) addSessionDataToContext(ctx huma.Context, sd *sessionData) huma.Context {
-	return huma.WithContext(ctx, context.WithValue(ctx.Context(), s.contextKey, sd))
+func (s *SessionManager) addSessionDataToContext(ctx context.Context, sd *sessionData) context.Context {
+	return context.WithValue(ctx, s.contextKey, sd)
 }
 
 func (s *SessionManager) getSessionDataFromContext(ctx context.Context) *sessionData {
