@@ -12,6 +12,44 @@ import (
 	"github.com/danielgtaylor/huma/v2/humatest"
 )
 
+func addRoutes(api huma.API, sessionManager *SessionManager) {
+	api.UseMiddleware(sessionManager.LoadAndSave)
+
+	huma.Register(api, huma.Operation{
+		Method: http.MethodPut,
+		Path:   "/put",
+	}, func(ctx context.Context, input *struct {
+		Cookie string `header:"Cookie"`
+	}) (*struct {
+		Status int `json:"status"`
+	}, error) {
+		sessionManager.Put(ctx, "foo", "bar")
+		return &struct {
+			Status int `json:"status"`
+		}{Status: http.StatusOK}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		Method: http.MethodGet,
+		Path:   "/get",
+	}, func(ctx context.Context, input *struct {
+		Session string `cookie:"session"`
+	}) (*struct {
+		Status int    `json:"status"`
+		Body   string `json:"body"`
+	}, error) {
+		v := sessionManager.Get(ctx, "foo")
+		if v == nil {
+			return nil, huma.NewError(http.StatusInternalServerError, "foo does not exist in session")
+		}
+
+		return &struct {
+			Status int    `json:"status"`
+			Body   string `json:"body"`
+		}{Status: http.StatusOK, Body: v.(string)}, nil
+	})
+}
+
 func TestEnable(t *testing.T) {
 	t.Parallel()
 
@@ -197,6 +235,61 @@ func TestLifetime(t *testing.T) {
 	}
 
 	err := json.Unmarshal(getResp.Body.Bytes(), &errorResponse)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal error response: %v", err)
+	}
+
+	if errorResponse.Detail != "foo does not exist in session" {
+		t.Errorf("want value %q; got %q", "foo does not exist in session", errorResponse.Detail)
+	}
+}
+
+func TestIdleTimeout(t *testing.T) {
+	t.Parallel()
+
+	sessionManager := New()
+	sessionManager.IdleTimeout = 200 * time.Millisecond
+
+	_, api := humatest.New(t)
+	addRoutes(api, sessionManager)
+
+	putResp := api.Put("/put")
+	if putResp.Code != http.StatusOK {
+		t.Errorf("want status %d; got %d", http.StatusOK, putResp.Code)
+	}
+	token := extractTokenFromCookie(putResp.Header().Get("Set-Cookie"))
+
+	time.Sleep(100 * time.Millisecond)
+
+	// First GET request
+	getResp1 := api.Get("/get", "Cookie: session="+token)
+	if getResp1.Code != http.StatusOK {
+		t.Errorf("want status %d; got %d", http.StatusOK, getResp1.Code)
+	}
+
+	time.Sleep(150 * time.Millisecond)
+
+	// Second GET request
+	getResp2 := api.Get("/get", "Cookie: session="+token)
+	if getResp2.Code != http.StatusOK {
+		t.Errorf("want status %d; got %d", http.StatusOK, getResp2.Code)
+	}
+
+	time.Sleep(200 * time.Millisecond)
+
+	// Third GET request
+	getResp3 := api.Get("/get", "Cookie: session="+token)
+	if getResp3.Code != http.StatusInternalServerError {
+		t.Errorf("want status %d; got %d", http.StatusInternalServerError, getResp3.Code)
+	}
+
+	var errorResponse struct {
+		Title  string `json:"title"`
+		Status int    `json:"status"`
+		Detail string `json:"detail"`
+	}
+
+	err := json.Unmarshal(getResp3.Body.Bytes(), &errorResponse)
 	if err != nil {
 		t.Fatalf("Failed to unmarshal error response: %v", err)
 	}
