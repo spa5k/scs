@@ -3,6 +3,7 @@ package scs
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -48,6 +49,34 @@ func addRoutes(api huma.API, sessionManager *SessionManager) {
 			Body   string `json:"body"`
 		}{Status: http.StatusOK, Body: v.(string)}, nil
 	})
+
+	huma.Register(api, huma.Operation{
+		Method: http.MethodDelete,
+		Path:   "/delete",
+	}, func(ctx context.Context, input *struct {
+		Cookie string `header:"Cookie"`
+	}) (*struct {
+		Status int `json:"status"`
+	}, error) {
+		sessionManager.Destroy(ctx)
+		return &struct {
+			Status int `json:"status"`
+		}{Status: http.StatusOK}, nil
+	})
+
+	huma.Register(api, huma.Operation{
+		Method: http.MethodPost,
+		Path:   "/renew",
+	}, func(ctx context.Context, input *struct {
+		Cookie string `header:"Cookie"`
+	}) (*struct {
+		Status int `json:"status"`
+	}, error) {
+		sessionManager.RenewToken(ctx)
+		return &struct {
+			Status int `json:"status"`
+		}{Status: http.StatusOK}, nil
+	})
 }
 
 func TestEnable(t *testing.T) {
@@ -57,42 +86,7 @@ func TestEnable(t *testing.T) {
 
 	_, api := humatest.New(t)
 
-	// Add session middleware
-	api.UseMiddleware(sessionManager.LoadAndSave)
-
-	huma.Register(api, huma.Operation{
-		Method: http.MethodPut,
-		Path:   "/put",
-	}, func(ctx context.Context, input *struct {
-		Cookie string `header:"Cookie"`
-	}) (*struct {
-		Status int `json:"status"`
-	}, error) {
-		sessionManager.Put(ctx, "foo", "bar")
-		return &struct {
-			Status int `json:"status"`
-		}{Status: http.StatusOK}, nil
-	})
-
-	huma.Register(api, huma.Operation{
-		Method: http.MethodGet,
-		Path:   "/get",
-	}, func(ctx context.Context, input *struct {
-		Session string `cookie:"session"`
-	}) (*struct {
-		Status int    `json:"status"`
-		Body   string `json:"body"`
-	}, error) {
-		v := sessionManager.Get(ctx, "foo")
-		if v == nil {
-			return nil, huma.NewError(http.StatusInternalServerError, "foo does not exist in session")
-		}
-
-		return &struct {
-			Status int    `json:"status"`
-			Body   string `json:"body"`
-		}{Status: http.StatusOK, Body: v.(string)}, nil
-	})
+	addRoutes(api, sessionManager)
 
 	// Test PUT request
 	putResp := api.Put("/put")
@@ -161,41 +155,7 @@ func TestLifetime(t *testing.T) {
 	_, api := humatest.New(t)
 
 	// Add session middleware
-	api.UseMiddleware(sessionManager.LoadAndSave)
-
-	huma.Register(api, huma.Operation{
-		Method: http.MethodPut,
-		Path:   "/put",
-	}, func(ctx context.Context, input *struct {
-		Cookie string `header:"Cookie"`
-	}) (*struct {
-		Status int `json:"status"`
-	}, error) {
-		sessionManager.Put(ctx, "foo", "bar")
-		return &struct {
-			Status int `json:"status"`
-		}{Status: http.StatusOK}, nil
-	})
-
-	huma.Register(api, huma.Operation{
-		Method: http.MethodGet,
-		Path:   "/get",
-	}, func(ctx context.Context, input *struct {
-		Session string `cookie:"session"`
-	}) (*struct {
-		Status int    `json:"status"`
-		Body   string `json:"body"`
-	}, error) {
-		v := sessionManager.Get(ctx, "foo")
-		if v == nil {
-			return nil, huma.NewError(http.StatusInternalServerError, "foo does not exist in session")
-		}
-
-		return &struct {
-			Status int    `json:"status"`
-			Body   string `json:"body"`
-		}{Status: http.StatusOK, Body: v.(string)}, nil
-	})
+	addRoutes(api, sessionManager)
 
 	putResp := api.Put("/put")
 
@@ -299,140 +259,104 @@ func TestIdleTimeout(t *testing.T) {
 	}
 }
 
-// func TestIdleTimeout(t *testing.T) {
-// 	t.Parallel()
+func TestDestroy(t *testing.T) {
+	t.Parallel()
 
-// 	sessionManager := New()
-// 	sessionManager.IdleTimeout = 200 * time.Millisecond
-// 	sessionManager.Lifetime = time.Second
+	sessionManager := New()
 
-// 	mux := http.NewServeMux()
-// 	mux.HandleFunc("/put", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		sessionManager.Put(r.Context(), "foo", "bar")
-// 	}))
-// 	mux.HandleFunc("/get", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		v := sessionManager.Get(r.Context(), "foo")
-// 		if v == nil {
-// 			http.Error(w, "foo does not exist in session", 500)
-// 			return
-// 		}
-// 		w.Write([]byte(v.(string)))
-// 	}))
+	_, api := humatest.New(t)
 
-// 	ts := newTestServer(t, sessionManager.LoadAndSave(mux))
-// 	defer ts.Close()
+	// Add routes
+	addRoutes(api, sessionManager)
 
-// 	ts.execute(t, "/put")
+	// Initial PUT request
+	putResp := api.Put("/put")
+	if putResp.Code != http.StatusOK {
+		t.Errorf("want status %d; got %d", http.StatusOK, putResp.Code)
+	}
+	token := extractTokenFromCookie(putResp.Header().Get("Set-Cookie"))
 
-// 	time.Sleep(100 * time.Millisecond)
-// 	ts.execute(t, "/get")
+	// Destroy session
+	destroyResp := api.Delete("/delete", "Cookie: session="+token)
+	if destroyResp.Code != http.StatusOK {
+		t.Errorf("want status %d; got %d", http.StatusOK, destroyResp.Code)
+	}
 
-// 	time.Sleep(150 * time.Millisecond)
-// 	_, body := ts.execute(t, "/get")
-// 	if body != "bar" {
-// 		t.Errorf("want %q; got %q", "bar", body)
-// 	}
+	cookie := destroyResp.Header().Get("Set-Cookie")
+	if !strings.HasPrefix(cookie, fmt.Sprintf("%s=;", sessionManager.Cookie.Name)) {
+		t.Fatalf("got %q: expected prefix %q", cookie, fmt.Sprintf("%s=;", sessionManager.Cookie.Name))
+	}
+	if !strings.Contains(cookie, "Expires=Thu, 01 Jan 1970 00:00:01 GMT") {
+		t.Fatalf("got %q: expected to contain %q", cookie, "Expires=Thu, 01 Jan 1970 00:00:01 GMT")
+	}
+	if !strings.Contains(cookie, "Max-Age=0") {
+		t.Fatalf("got %q: expected to contain %q", cookie, "Max-Age=0")
+	}
 
-// 	time.Sleep(200 * time.Millisecond)
-// 	_, body = ts.execute(t, "/get")
-// 	if body != "foo does not exist in session\n" {
-// 		t.Errorf("want %q; got %q", "foo does not exist in session\n", body)
-// 	}
-// }
+	// Try to get the destroyed session
+	getResp := api.Get("/get", "Cookie: session="+token)
+	if getResp.Code != http.StatusInternalServerError {
+		t.Errorf("want status %d; got %d", http.StatusInternalServerError, getResp.Code)
+	}
 
-// func TestDestroy(t *testing.T) {
-// 	t.Parallel()
+	var errorResponse struct {
+		Title  string `json:"title"`
+		Status int    `json:"status"`
+		Detail string `json:"detail"`
+	}
+	if err := json.Unmarshal(getResp.Body.Bytes(), &errorResponse); err != nil {
+		t.Fatalf("Failed to unmarshal error response: %v", err)
+	}
 
-// 	sessionManager := New()
+	expectedErrorDetail := "foo does not exist in session"
+	if errorResponse.Detail != expectedErrorDetail {
+		t.Errorf("want error detail %q; got %q", expectedErrorDetail, errorResponse.Detail)
+	}
+}
 
-// 	mux := http.NewServeMux()
-// 	mux.HandleFunc("/put", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		sessionManager.Put(r.Context(), "foo", "bar")
-// 	}))
-// 	mux.HandleFunc("/destroy", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		err := sessionManager.Destroy(r.Context())
-// 		if err != nil {
-// 			http.Error(w, err.Error(), 500)
-// 			return
-// 		}
-// 	}))
-// 	mux.HandleFunc("/get", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		v := sessionManager.Get(r.Context(), "foo")
-// 		if v == nil {
-// 			http.Error(w, "foo does not exist in session", 500)
-// 			return
-// 		}
-// 		w.Write([]byte(v.(string)))
-// 	}))
+func TestRenewToken(t *testing.T) {
+	t.Parallel()
 
-// 	ts := newTestServer(t, sessionManager.LoadAndSave(mux))
-// 	defer ts.Close()
+	sessionManager := New()
 
-// 	ts.execute(t, "/put")
-// 	header, _ := ts.execute(t, "/destroy")
-// 	cookie := header.Get("Set-Cookie")
+	_, api := humatest.New(t)
 
-// 	if strings.HasPrefix(cookie, fmt.Sprintf("%s=;", sessionManager.Cookie.Name)) == false {
-// 		t.Fatalf("got %q: expected prefix %q", cookie, fmt.Sprintf("%s=;", sessionManager.Cookie.Name))
-// 	}
-// 	if strings.Contains(cookie, "Expires=Thu, 01 Jan 1970 00:00:01 GMT") == false {
-// 		t.Fatalf("got %q: expected to contain %q", cookie, "Expires=Thu, 01 Jan 1970 00:00:01 GMT")
-// 	}
-// 	if strings.Contains(cookie, "Max-Age=0") == false {
-// 		t.Fatalf("got %q: expected to contain %q", cookie, "Max-Age=0")
-// 	}
+	// Add routes
+	addRoutes(api, sessionManager)
 
-// 	_, body := ts.execute(t, "/get")
-// 	if body != "foo does not exist in session\n" {
-// 		t.Errorf("want %q; got %q", "foo does not exist in session\n", body)
-// 	}
-// }
+	// Initial PUT request
+	putResp := api.Put("/put")
+	if putResp.Code != http.StatusOK {
+		t.Errorf("want status %d; got %d", http.StatusOK, putResp.Code)
+	}
+	originalToken := extractTokenFromCookie(putResp.Header().Get("Set-Cookie"))
 
-// func TestRenewToken(t *testing.T) {
-// 	t.Parallel()
+	// Renew token
+	renewResp := api.Post("/renew", "Cookie: session="+originalToken)
+	if renewResp.Code != http.StatusOK {
+		t.Errorf("want status %d; got %d", http.StatusOK, renewResp.Code)
+	}
+	newToken := extractTokenFromCookie(renewResp.Header().Get("Set-Cookie"))
 
-// 	sessionManager := New()
+	if newToken == originalToken {
+		t.Fatal("token has not changed")
+	}
 
-// 	mux := http.NewServeMux()
-// 	mux.HandleFunc("/put", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		sessionManager.Put(r.Context(), "foo", "bar")
-// 	}))
-// 	mux.HandleFunc("/renew", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		err := sessionManager.RenewToken(r.Context())
-// 		if err != nil {
-// 			http.Error(w, err.Error(), 500)
-// 			return
-// 		}
-// 	}))
-// 	mux.HandleFunc("/get", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		v := sessionManager.Get(r.Context(), "foo")
-// 		if v == nil {
-// 			http.Error(w, "foo does not exist in session", 500)
-// 			return
-// 		}
-// 		w.Write([]byte(v.(string)))
-// 	}))
+	// Get session data with new token
+	getResp := api.Get("/get", "Cookie: session="+newToken)
+	if getResp.Code != http.StatusOK {
+		t.Errorf("want status %d; got %d", http.StatusOK, getResp.Code)
+	}
 
-// 	ts := newTestServer(t, sessionManager.LoadAndSave(mux))
-// 	defer ts.Close()
+	var responseBody string
+	if err := json.Unmarshal(getResp.Body.Bytes(), &responseBody); err != nil {
+		t.Fatalf("Failed to unmarshal response body: %v", err)
+	}
 
-// 	header, _ := ts.execute(t, "/put")
-// 	cookie := header.Get("Set-Cookie")
-// 	originalToken := extractTokenFromCookie(cookie)
-
-// 	header, _ = ts.execute(t, "/renew")
-// 	cookie = header.Get("Set-Cookie")
-// 	newToken := extractTokenFromCookie(cookie)
-
-// 	if newToken == originalToken {
-// 		t.Fatal("token has not changed")
-// 	}
-
-// 	_, body := ts.execute(t, "/get")
-// 	if body != "bar" {
-// 		t.Errorf("want %q; got %q", "bar", body)
-// 	}
-// }
+	if responseBody != "bar" {
+		t.Errorf("want %q; got %q", "bar", responseBody)
+	}
+}
 
 // func TestRememberMe(t *testing.T) {
 // 	t.Parallel()
