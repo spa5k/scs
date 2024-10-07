@@ -1,4 +1,4 @@
-module github.com/alexedwards/scs/v2
+module github.com/spa5k/huma-scs
 
 go 1.21
 

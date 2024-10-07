@@ -30,7 +30,7 @@ import (
 	"net/http"
 
 	"github.com/alexedwards/scs/pgxstore"
-	"github.com/alexedwards/scs/v2"
+	"github.com/spa5k/huma-scs"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

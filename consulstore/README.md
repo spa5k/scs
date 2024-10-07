@@ -15,7 +15,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/alexedwards/scs/v2"
+	"github.com/spa5k/huma-scs"
 	"github.com/alexedwards/scs/consulstore"
 	"github.com/hashicorp/consul/api"
 )

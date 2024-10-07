@@ -32,7 +32,7 @@ import (
 	"net/http"
 
 	"github.com/alexedwards/scs/gormstore"
-	"github.com/alexedwards/scs/v2"
+	"github.com/spa5k/huma-scs"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

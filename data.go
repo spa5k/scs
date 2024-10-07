@@ -606,7 +606,6 @@ func (s *SessionManager) Token(ctx context.Context) string {
 }
 
 func (s *SessionManager) addSessionDataToContext(ctx huma.Context, sd *sessionData) huma.Context {
-	// return ctx.WithContext(context.WithValue(ctx.Context(), s.contextKey, sd))
 	return huma.WithContext(ctx, context.WithValue(ctx.Context(), s.contextKey, sd))
 }
 

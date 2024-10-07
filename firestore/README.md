@@ -22,7 +22,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	scsfs "github.com/alexedwards/scs/firestore"
-	"github.com/alexedwards/scs/v2"
+	"github.com/spa5k/huma-scs"
 )
 
 var sessionManager *scs.SessionManager

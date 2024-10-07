@@ -1,14 +1,15 @@
 package scs
 
 import (
-	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
-	"github.com/alexedwards/scs/v2/memstore"
 	"github.com/danielgtaylor/huma/v2"
+	"github.com/spa5k/huma-scs/memstore"
 )
 
 // Deprecated: Session is a backwards-compatible alias for SessionManager.
@@ -122,6 +123,8 @@ func New() *SessionManager {
 	return s
 }
 
+var logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+
 // LoadAndSave provides middleware which automatically loads and saves session
 // data for the current request, and communicates the session token to and from
 // the client in a cookie.
@@ -129,16 +132,11 @@ func (s *SessionManager) LoadAndSave(ctx huma.Context, next func(huma.Context)) 
 	ctx.SetHeader("Vary", "Cookie")
 	var token string
 	cookie, err := huma.ReadCookie(ctx, s.Cookie.Name)
-	if err != nil {
-		fmt.Println("error reading cookie", err)
-		return
-	}
 
-	if cookie.Value != "" {
+	if err == nil {
 		token = cookie.Value
 	}
 
-	// load session
 	ctx, err = s.Load(ctx, token)
 	if err != nil {
 		s.ErrorFunc(ctx, err)
@@ -149,6 +147,9 @@ func (s *SessionManager) LoadAndSave(ctx huma.Context, next func(huma.Context)) 
 		request:        ctx,
 		sessionManager: s,
 	}
+
+	// add session manager to context
+	ctx = huma.WithValue(ctx, "sw", sw)
 
 	next(ctx)
 

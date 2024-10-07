@@ -33,7 +33,7 @@ import (
 	"net/http"
 
 	"github.com/alexedwards/scs/bunstore"
-	"github.com/alexedwards/scs/v2"
+	"github.com/spa5k/huma-scs"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	_ "github.com/uptrace/bun/driver/pgdriver"

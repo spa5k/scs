@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs/mongodbstore"
-	"github.com/alexedwards/scs/v2"
+	"github.com/spa5k/huma-scs"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
