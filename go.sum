@@ -1,3 +1,5 @@
+github.com/alexedwards/scs/v2 v2.8.0 h1:h31yUYoycPuL0zt14c0gd+oqxfRwIj6SOjHdKRZxhEw=
+github.com/alexedwards/scs/v2 v2.8.0/go.mod h1:ToaROZxyKukJKT/xLcVQAChi5k6+Pn1Gvmdl7h3RRj8=
 github.com/danielgtaylor/huma/v2 v2.23.0 h1:0Q3Mq+KTYr6shFqx3gQulDTVwR9xa6/SmSmbDJCRyMI=
 github.com/danielgtaylor/huma/v2 v2.23.0/go.mod h1:2NZmGf/A+SstJYQlq0Xp4nsTDCmPvKS2w9vI8c9sf1A=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

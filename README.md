@@ -15,21 +15,22 @@
 ## Instructions
 
 - [SCS: HTTP Session Management for Go](#scs-http-session-management-for-go)
-  - [Features](#features)
-  - [Instructions](#instructions)
-    - [Installation](#installation)
-    - [Basic Use](#basic-use)
-    - [Configuring Session Behavior](#configuring-session-behavior)
-    - [Working with Session Data](#working-with-session-data)
-    - [Loading and Saving Sessions](#loading-and-saving-sessions)
-    - [Configuring the Session Store](#configuring-the-session-store)
-    - [Using Custom Session Stores](#using-custom-session-stores)
-      - [Using Custom Session Stores (with context.Context)](#using-custom-session-stores-with-contextcontext)
-    - [Multiple Sessions per Request](#multiple-sessions-per-request)
-    - [Enumerate All Sessions](#enumerate-all-sessions)
-    - [Flushing and Streaming Responses](#flushing-and-streaming-responses)
-    - [Compatibility](#compatibility)
-    - [Contributing](#contributing)
+	- [Features](#features)
+	- [Instructions](#instructions)
+		- [Installation](#installation)
+		- [Basic Use](#basic-use)
+		- [Configuring Session Behavior](#configuring-session-behavior)
+		- [Working with Session Data](#working-with-session-data)
+		- [Loading and Saving Sessions](#loading-and-saving-sessions)
+		- [Configuring the Session Store](#configuring-the-session-store)
+		- [Using Custom Session Stores](#using-custom-session-stores)
+			- [Using Custom Session Stores (with context.Context)](#using-custom-session-stores-with-contextcontext)
+		- [Preventing Session Fixation](#preventing-session-fixation)
+		- [Multiple Sessions per Request](#multiple-sessions-per-request)
+		- [Enumerate All Sessions](#enumerate-all-sessions)
+		- [Flushing and Streaming Responses](#flushing-and-streaming-responses)
+		- [Compatibility](#compatibility)
+		- [Contributing](#contributing)
 
 ### Installation
 
@@ -149,32 +150,34 @@ By default SCS uses an in-memory store for session data. This is convenient (no 
 
 The session stores currently included are shown in the table below. Please click the links for usage instructions and examples.
 
-| Package                                                                            |                                                                                       |
-| :--------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| [badgerstore](https://github.com/spa5k/huma-scs/tree/master/badgerstore)           | Badger based session store                                                            |
-| [boltstore](https://github.com/spa5k/huma-scs/tree/master/boltstore)               | Bolt based session store                                                              |
-| [bunstore](https://github.com/spa5k/huma-scs/tree/master/bunstore)                 | Bun based session store                                                               |
-| [buntdbstore](https://github.com/spa5k/huma-scs/tree/master/buntdbstore)           | BuntDB based session store                                                            |
-| [cockroachdbstore](https://github.com/spa5k/huma-scs/tree/master/cockroachdbstore) | CockroachDB based session store                                                       |
-| [consulstore](https://github.com/spa5k/huma-scs/tree/master/consulstore)           | Consul based session store                                                            |
-| [etcdstore](https://github.com/spa5k/huma-scs/tree/master/etcdstore)               | Etcd based session store                                                              |
-| [firestore](https://github.com/spa5k/huma-scs/tree/master/firestore)               | Google Cloud Firestore based session store                                            |
-| [gormstore](https://github.com/spa5k/huma-scs/tree/master/gormstore)               | GORM based session store                                                              |
-| [leveldbstore](https://github.com/spa5k/huma-scs/tree/master/leveldbstore)         | LevelDB based session store                                                           |
-| [memstore](https://github.com/spa5k/huma-scs/tree/master/memstore)                 | In-memory session store (default)                                                     |
-| [mongodbstore](https://github.com/spa5k/huma-scs/tree/master/mongodbstore)         | MongoDB based session store                                                           |
-| [mssqlstore](https://github.com/spa5k/huma-scs/tree/master/mssqlstore)             | MSSQL based session store                                                             |
-| [mysqlstore](https://github.com/spa5k/huma-scs/tree/master/mysqlstore)             | MySQL based session store                                                             |
-| [pgxstore](https://github.com/spa5k/huma-scs/tree/master/pgxstore)                 | PostgreSQL based session store (using the [pgx](https://github.com/jackc/pgx) driver) |
-| [postgresstore](https://github.com/spa5k/huma-scs/tree/master/postgresstore)       | PostgreSQL based session store (using the [pq](https://github.com/lib/pq) driver)     |
-| [redisstore](https://github.com/spa5k/huma-scs/tree/master/redisstore)             | Redis based session store                                                             |
-| [sqlite3store](https://github.com/spa5k/huma-scs/tree/master/sqlite3store)         | SQLite3 based session store                                                           |
+| Package                                                                             |                                                                                       |
+| :---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [badgerstore](https://github.com/alexedwards/scs/tree/master/badgerstore)           | Badger based session store                                                            |
+| [boltstore](https://github.com/alexedwards/scs/tree/master/boltstore)               | Bolt based session store                                                              |
+| [bunstore](https://github.com/alexedwards/scs/tree/master/bunstore)                 | Bun based session store                                                               |
+| [buntdbstore](https://github.com/alexedwards/scs/tree/master/buntdbstore)           | BuntDB based session store                                                            |
+| [cockroachdbstore](https://github.com/alexedwards/scs/tree/master/cockroachdbstore) | CockroachDB based session store                                                       |
+| [consulstore](https://github.com/alexedwards/scs/tree/master/consulstore)           | Consul based session store                                                            |
+| [etcdstore](https://github.com/alexedwards/scs/tree/master/etcdstore)               | Etcd based session store                                                              |
+| [firestore](https://github.com/alexedwards/scs/tree/master/firestore)               | Google Cloud Firestore based session store                                            |
+| [gormstore](https://github.com/alexedwards/scs/tree/master/gormstore)               | GORM based session store                                                              |
+| [leveldbstore](https://github.com/alexedwards/scs/tree/master/leveldbstore)         | LevelDB based session store                                                           |
+| [memstore](https://github.com/alexedwards/scs/tree/master/memstore)                 | In-memory session store (default)                                                     |
+| [mongodbstore](https://github.com/alexedwards/scs/tree/master/mongodbstore)         | MongoDB based session store                                                           |
+| [mssqlstore](https://github.com/alexedwards/scs/tree/master/mssqlstore)             | MSSQL based session store                                                             |
+| [mysqlstore](https://github.com/alexedwards/scs/tree/master/mysqlstore)             | MySQL based session store                                                             |
+| [pgxstore](https://github.com/alexedwards/scs/tree/master/pgxstore)                 | PostgreSQL based session store (using the [pgx](https://github.com/jackc/pgx) driver) |
+| [postgresstore](https://github.com/alexedwards/scs/tree/master/postgresstore)       | PostgreSQL based session store (using the [pq](https://github.com/lib/pq) driver)     |
+| [redisstore](https://github.com/alexedwards/scs/tree/master/redisstore)             | Redis based session store                                                             |
+| [sqlite3store](https://github.com/alexedwards/scs/tree/master/sqlite3store)         | SQLite3 based session store                                                           |
+
+Custom session stores are also supported. Please [see here](#using-custom-session-stores) for more information.
 
 Custom session stores are also supported. Please [see here](#using-custom-session-stores) for more information.
 
 ### Using Custom Session Stores
 
-[`scs.Store`](https://pkg.go.dev/github.com/spa5k/huma-scs#Store) defines the interface for custom session stores. Any object that implements this interface can be set as the store when configuring the session.
+[`scs.Store`](https://pkg.go.dev/github.com/alexedwards/scs/v2#Store) defines the interface for custom session stores. Any object that implements this interface can be set as the store when configuring the session.
 
 ```go
 type Store interface {

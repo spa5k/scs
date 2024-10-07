@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/spa5k/huma-scs/mockstore"
+	"github.com/alexedwards/scs/v2/mockstore"
 )
 
 func TestSessionDataFromContext(t *testing.T) {

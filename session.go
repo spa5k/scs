@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/alexedwards/scs/v2/memstore"
 	"github.com/danielgtaylor/huma/v2"
-	"github.com/spa5k/huma-scs/memstore"
 )
 
 // Deprecated: Session is a backwards-compatible alias for SessionManager.
