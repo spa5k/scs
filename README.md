@@ -1,8 +1,8 @@
 # SCS: HTTP Session Management for Go
 
-[![GoDoc](https://godoc.org/github.com/spa5k/huma-scs?status.png)](https://pkg.go.dev/github.com/spa5k/huma-scs?tab=doc)
-[![Go report card](https://goreportcard.com/badge/github.com/spa5k/huma-scs)](https://goreportcard.com/report/github.com/spa5k/huma-scs)
-[![Test coverage](http://gocover.io/_badge/github.com/spa5k/huma-scs)](https://gocover.io/github.com/spa5k/huma-scs)
+[![GoDoc](https://godoc.org/github.com/spa5k/scs?status.png)](https://pkg.go.dev/github.com/spa5k/scs?tab=doc)
+[![Go report card](https://goreportcard.com/badge/github.com/spa5k/scs)](https://goreportcard.com/report/github.com/spa5k/scs)
+[![Test coverage](http://gocover.io/_badge/github.com/spa5k/scs)](https://gocover.io/github.com/spa5k/scs)
 
 ## Features
 
@@ -27,10 +27,10 @@
 This package requires Go 1.12 or newer.
 
 ```sh
-go get github.com/spa5k/huma-scs
+go get github.com/spa5k/scs
 ```
 
-Please use [versioned releases](https://github.com/spa5k/huma-scs/releases). Code in tip may contain experimental features which are subject to change.
+Please use [versioned releases](https://github.com/spa5k/scs/releases). Code in tip may contain experimental features which are subject to change.
 
 ### Basic Use
 
@@ -47,7 +47,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 	"github.com/go-chi/chi/v5"
-	"github.com/spa5k/huma-scs"
+	"github.com/spa5k/scs"
 )
 
 // Create your router.
@@ -132,7 +132,7 @@ sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 sessionManager.Cookie.Secure = true
 ```
 
-Documentation for all available settings and their default values can be [found here](https://pkg.go.dev/github.com/spa5k/huma-scs#SessionManager).
+Documentation for all available settings and their default values can be [found here](https://pkg.go.dev/github.com/spa5k/scs#SessionManager).
 
 
 ### For more documentation, see the [SCS documentation](https://pkg.go.dev/github.com/alexedwards/scs/v2).

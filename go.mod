@@ -1,4 +1,4 @@
-module github.com/spa5k/huma-scs
+module github.com/spa5k/scs
 
 go 1.23
 
